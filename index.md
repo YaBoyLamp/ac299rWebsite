@@ -86,7 +86,9 @@ The basic idea of random projection is to multiply an input which is sparse by a
 One exmaple of using random projection in the literature is from Pourkamali-Anaraki et al.[^3]. In this paper, random projection is applied to a simulated data set and traditional methods for learning dictionary learning are applied to the projected data. In order to take advantage of efficient computation the projection matricies are intialized with each entry drawn from {-1,0,1} with probabilities $$\{\frac{1}{2s}, 1- \frac{1}{s}, \frac{1}{2s}\}$$ for $$ s \geq 1 $$. Additionally, this paper uses multiple projection matricies for their dataset so blocks of data are compressed using the same $$\phi$$.
 
 We apply random projection to CRsAE with both Gaussian and Sparse-Bernoulli intializations. In this setting the auto-encoder will receive an image that has been projected into compressed space, decompress that image by multiplying $$\phi^\top$$, apply FISTA to the decompressed image, decode the encoding back to image space using $$\phi A$$. 
+
 !['CRsAE RP block'](/imgs/CRsAE_RP_diagram.PNG) 
+
 Some important modifications to the original CRsAE diagram are the dimensions that the architecture receives and the dictionary that FISTA uses. The model only receives projected data, so in FISTA a matrix must be used to convert from compressed space $$\R^M$$ to encoding space $$\R^N$$. For this reason the product $$\phi A$$ is used instead of just $$A$$. In this model $$\phi$$ is a constant, so although FISTA uses $$\phi$$ to generate an encoding $$\phi$$ is never updated and only $$A$$ is modified in the dictionary update step. While this auto-encoder receives and outputs in compressed space $$\R^M$$, the encodings $$x_i$$'s can be taken and multiplied by $$A$$ instead of $$\phi A$$ to create reconstructions in the original uncompressed space $$\R^D$$.
 
 TODO: Add images/plots and explain results
@@ -94,11 +96,16 @@ TODO: Add images/plots and explain results
 We generate simulated data assuming that there is a true dictionary and sparse encoding to be learned. We initialize sparse vectors of dimension 100 with 4 entries and then multiply them by a dictionary of dimension $$(100 \times 100)$$ to produce images. We draw the value of the sparse encodings from a uniform distribution on the interval $$[-5,-4] \cup [4,5]$$. In the following training setting we initialize our auto-encoder with a perturbed version of the dictionary used to generate the dataset. The below plots show the input images compared to the images recovered by the autoencoder after training, the simulated sparse encodings against the learned sparse encodings, and an error plot over training epoch. Our error is the maximal cosine distance over all the columns of the learned dictionary and initial dictionaries.
 ## Uncompressed
 From these plots we can see that the auto-encoder is able to reproduce the images essentially perfectly. Additionally the encodings are able to be recovered with almost the same amplitude. We attribute the difference to the regularization factor. The last plot shows that the dictionary is able to converge to the true dictionary.
+
 !['plots Identity simulated'](/imgs/sim_I_plots.PNG) 
+
 ## Compressed
 In this setting we add a $$\phi$$ with dimension $$(80 \times 100)$$, which means that our encoder is working with data thats is 20% smaller. The auto-encoder is still able to recover images and the true encodings but the dictionary does not converge as nicely to the real dictionary.
+
 !['plots Identity simulated'](/imgs/sim_80_plots.PNG)
+
 Below is a plot demonstrating how dictionary error increases as the compression dimension decreases. The blue demonstrates having no $$\phi$$ while the other lines show deceasing compression dimensions.
+
 !['compressed error plots'](/imgs/compressed_error_plots.png)
 
 # Application: MNIST
@@ -113,7 +120,7 @@ In this setting we do not explicity attempt to learn a good image reconstruction
 !['MNIST acc plots'](/imgs/MNIST_acc_plot.PNG)
 
 From these plots we can see that the encodings are quite sparse and the reconstructions are quite good despite not explicitly telling the model to learn a good image representation. We also see that the model achieves 98% test accuracy, which is about as good as state of the art dense neural nets. Additionally, we can see the features that the dicionary is learning by plotting he columns of our dictionary as images.
-!['MNIST features'](/imgs/MNIST_featuers.PNG)
+!['MNIST features'](/imgs/MNIST_featuers.png)
 From these pictures we can see that the dictionary is learning details of the images. Some image show curves and shaped that resemble the digits such the image in the far right that looks like a 3. Many images, however, just look like the initialized gaussian noise.
 # Conclusion
 Overall, CRsAE has shown to be a robust dictioanry learning tool. Not only does it show success in simulated data, but it also is successful on real world data. The dictionaries learned show meaningful and interpretable features, while still maintaining sparse encodings. Additionally, random projection has been shown to work successfully in tandem with CRsAE. 
