@@ -5,7 +5,6 @@ $$
 \newcommand{\R}{\mathbb{R}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
-\usepackage[options ]{algorithm2e}
 $$
 
 - [Overview](#overview)
@@ -51,22 +50,25 @@ We also constrain the columns of $A$ to be norm of 1 to ensure that the the ener
 ## Model Architecture
 To solve these optimization problems we use the following architecture.
 !['CRsAE block'](/imgs/CRsAE_diagram.PNG) 
-Starting with our data we apply FISTA using our dictionary $$A$$ to yield sparse encodings $$\hat{x}$$. We then decompress this encoding using the same dictionary $$A$$ by matrix multiplying our encoding by the dictionary. FISTA was first proposed by Beck and Teboulle [^2] and is a fast iterative procedure to find a sparse solution to the linear system in the above encoding approximation step. FISTA generates a sequence of sparse approximations using an $$l_1$$ norm penalty. The details of the algorithm are below and further reading can be seen in Beck and Teboulle [^2].
+Starting with our data we apply FISTA using our dictionary $$A$$ to yield sparse encodings $$\hat{x}$$. We then decompress this encoding using the same dictionary $$A$$ by matrix multiplying our encoding by the dictionary. FISTA was first proposed by Beck and Teboulle [^2] and is a fast iterative procedure to find a sparse solution to the linear system in the above encoding approximation step. FISTA generates a sequence of sparse approximations using an $$l_1$$ norm penalty. The details of the algorithm are below in pseudocode and further reading can be seen in Beck and Teboulle [^2].
 
-$$
-\begin{algorithm}[H]
-\SetAlgoLined
-\KwResult{Write here the result }
- initialization\;
- \While{While condition}{
-  instructions\;
-  \eIf{condition}{
-   instructions1\;
-   instructions2\;
-   }{
-   instructions3\;
-  }
- }
- \caption{How to write algorithms}
-\end{algorithm}
-$$
+```python
+# Let all x's and y's be column vectors with dimensionality of the encoding size (N)
+# A is the dictionary (DxN)
+x_old = [0] * N
+x_new = [0] * N
+t_old = 0
+for t in range(T):
+    t_new = (1 + sqrt(1 + 4 * t_old * t_old)) / 2
+    y_new = x_new + (t_old - 1) / t_new * (x_new - x_old)
+    x_new = y_old + A_transpose * (x - A * y_old) / L
+
+    # Apply shrinkage based off of size of lambda
+    x_new = self.relu(torch.abs(x_new) - self.lam / self.L) * torch.sign(x_new)
+    
+    x_old = x_new
+    t_old = t_new
+    y_old = y_new
+```
+
+The decoding step is handled
