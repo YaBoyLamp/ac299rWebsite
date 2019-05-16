@@ -91,11 +91,27 @@ Some important modifications to the original CRsAE diagram are the dimensions th
 
 TODO: Add images/plots and explain results
 # Simulated Data
+We generate simulated data assuming that there is a true dictionary and sparse encoding to be learned. We initialize sparse vectors of dimension 100 with 4 entries and then multiply them by a dictionary of dimension $$(100 \times 100)$$ to produce images. We draw the value of the sparse encodings from a uniform distribution on the interval $$[-5,-4] \cup [4,5]$$. In the following training setting we initialize our auto-encoder with a perturbed version of the dictionary used to generate the dataset. The below plots show the input images compared to the images recovered by the autoencoder after training, the simulated sparse encodings against the learned sparse encodings, and an error plot over training epoch. Our error is the maximal cosine distance over all the columns of the learned dictionary and initial dictionaries.
 ## Uncompressed
+From these plots we can see that the auto-encoder is able to reproduce the images essentially perfectly. Additionally the encodings are able to be recovered with almost the same amplitude. We attribute the difference to the regularization factor. The last plot shows that the dictionary is able to converge to the true dictionary.
+!['plots Identity simulated'](/imgs/sim_I_plots.PNG) 
 ## Compressed
-## Multiple Compression Matricies
+In this setting we add a $$\phi$$ with dimension $$(80 \times 100)$$, which means that our encoder is working with data thats is 20% smaller. The auto-encoder is still able to recover images and the true encodings but the dictionary does not converge as nicely to the real dictionary.
+!['plots Identity simulated'](/imgs/sim_80_plots.PNG)
+Below is a plot demonstrating how dictionary error increases as the compression dimension decreases. The blue demonstrates having no $$\phi$$ while the other lines show deceasing compression dimensions.
+!['compressed error plots'](/imgs/compressed_error_plots.png)
+
 # Application: MNIST
-## Architectures
+We apply the CRsAE arhitecture to learning MNIST the handwritten digit dataset. Instead of only testing the auto-encoder, we attempt to classify based off of the encodings the sparse encodings that we generate.
 ## No Decoder Performance
-## Autoencoder with Classifier
+In this setting we do not explicity attempt to learn a good image reconstruction. This architecture only performs the encoding step and then performs logistic regression on the sparse encodings. Therefore, the loss function of this architecture is the Cross entropy loss when classifying. We can, however, manually perform the decoding step by multiplying our sparse encodings by our learned dictionary manually.
+
+
+ Below are plots of the sparse encodings produced, our manually reconstructed images, and the real inputted image. Lastly there is also a plot of the classification accuracy on the training and test sets.
+!['MNIST image plots'](/imgs/MNIST_I_plots.png)
+!['MNIST image plots'](/imgs/MNIST_acc_plot.png)
+From these plots we can see that the encodings are quite sparse and the reconstructions are quite good despite not explicitly telling the model to learn a good image representation. We also see that the model achieves 98% test accuracy, which is about as good as state of the art dense neural nets. Additionally, we can see the features that the dicionary is learning by plotting he columns of our dictionary as images.
+!['MNIST features'](/imgs/MNIST_features.png)
+From these pictures we can see that the dictionary is learning details of the images. Some image show curves and shaped that resemble the digits such the image in the far right that looks like a 3. Many images, however, just look like the initialized gaussian noise.
 # Conclusion
+Overall, CRsAE has shown to be a robust dictioanry learning tool. Not only does it show success in simulated data, but it also is successful on real world data. The dictionaries learned show meaningful and interpretable features, while still maintaining sparse encodings. Additionally, random projection has been shown to work successfully in tandem with CRsAE. 
