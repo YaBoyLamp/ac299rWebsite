@@ -108,10 +108,12 @@ In this setting we do not explicity attempt to learn a good image reconstruction
 
 
  Below are plots of the sparse encodings produced, our manually reconstructed images, and the real inputted image. Lastly there is also a plot of the classification accuracy on the training and test sets.
-!['MNIST image plots'](/imgs/MNIST_I_plots.png)
-!['MNIST image plots'](/imgs/MNIST_acc_plot.png)
+
+!['MNIST image plots'](/imgs/MNIST_I_plots.PNG)
+!['MNIST acc plots'](/imgs/MNIST_acc_plot.PNG)
+
 From these plots we can see that the encodings are quite sparse and the reconstructions are quite good despite not explicitly telling the model to learn a good image representation. We also see that the model achieves 98% test accuracy, which is about as good as state of the art dense neural nets. Additionally, we can see the features that the dicionary is learning by plotting he columns of our dictionary as images.
-!['MNIST features'](/imgs/MNIST_features.png)
+!['MNIST features'](/imgs/MNIST_featuers.PNG)
 From these pictures we can see that the dictionary is learning details of the images. Some image show curves and shaped that resemble the digits such the image in the far right that looks like a 3. Many images, however, just look like the initialized gaussian noise.
 # Conclusion
 Overall, CRsAE has shown to be a robust dictioanry learning tool. Not only does it show success in simulated data, but it also is successful on real world data. The dictionaries learned show meaningful and interpretable features, while still maintaining sparse encodings. Additionally, random projection has been shown to work successfully in tandem with CRsAE. 
