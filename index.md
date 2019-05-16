@@ -1,37 +1,42 @@
-## Welcome to GitHub Pages
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+$$
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\R}{\mathbb{R}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+$$
+AC299R
+==========================
 
-You can use the [editor on GitHub](https://github.com/YaBoyLamp/ac299rWebsite/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+- [Overview](#overview)
+- [Motivation](#motivation)
+  * [Dictionary Learning](#dicitonary-learning)
+- [Literature Review](#literature-review)
+  * [Fast Iterative Shrinking-Thresholding Algorithm](#fast-iterative-shrinking-thresholding-algorithm)
+  * [Constrained Recurrent Sparse Auto-Encoder](#constrained-recurrent-sparse-auto-encoder) 
+  * [Random Projection](#random-projection)
+- [Simulated Data](#simulated-data)
+  * [Uncompressed](#uncompressed)
+  * [Compressed](#compressed)
+  * [Multiple Compression Matricies](#multiple-compression-matricies)
+- [Application: MNIST](#adversarial-training-with-data-augmentation)
+  * [Architectures](#MNIST-architectures)
+  * [No Decoder Performance](#MNIST-no-encoder-performace)
+  * [Autoencoder with Classifier](#MNIST-autoencoder-performance)
+- [Conclusion](#conclusion)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# Overview
+With advising from [Demba Ba](https://www.seas.harvard.edu/directory/demba) and [Bahareh Tolooshams](https://crisp.seas.harvard.edu/people/bahareh-tolooshams), this project aims to use a carefully designed auto-encoder to learn a dictionary for a set of observations, while enforcing a sparsity constraint on the produced encodings. This project uses the constrained recurrent sparse auto-encoder (CRsAE) to find a sprase encoding approximation using the Fast Iterative Shrinking-Threshold Algorithm (FISTA) to generate a sparse encoding approximation and then applies the same dictionary in the decoding step. In addition to evaluating the performance of this model, this project evaluates the performance of this model when evaluated on data that has been compressed through random projeciton.
 
-### Markdown
+# Motivation
+In signal processing, dictionary learning is one of the most prominent frameworks for representation learning. Using a method that is neural network based opens the door for efficient computation from GPU based paralellization. Additionally, learning one set of weights used in both encoding and decoding allows for interpretability of the dictionary.
+## Dictionary Learning
+Dictionary learning can be described as learning a linear combination of vectors to represent an input such that each of vector is a column of a matrix (the dictionary) and the coefficients are vector representations. We focus on the case where these representations are sparse. More formally stated dictionary learning can be described in the following way. Given a set of inputs $\Y = [y_1, ..., y_K], y_i \in \R^{d}$ we attempt to find a dictionary $A \in \R^{d \times n}$ and a representation or encoding $X = [x_1, ..., x_K], x_i \in \R^n$ such that the reconstruction error is minimized $||\Y - AX||$. Enforcing a sparsity constraint we can write this as the following optimization problem.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+$$ \argmin_{A \in \R^{d \times n}, r_i \in \R^n} \sum_{i=1}^K ||y_i -Ax_i||_2^2 + \lambda||x_i||_0$$
+Note: While the problem is written with $l_0$ norm this makes solving this problem NP-hard, so practically we use $l_1$ norm.
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/YaBoyLamp/ac299rWebsite/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+# Literature Review
+This project primarily applies previous work from Tolooshams et al.[^1] to a setting without convolutions and with the addition of random projection as compression. This section will briefly review FISTA, the algorithm used by CRsAE to achieve sparse encodings, the previous work on CRsAE, and Random Projection.
+## Fast Iterative Shrinking-Thresholding Algorithm
